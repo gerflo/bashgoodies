@@ -1,0 +1,56 @@
+#! /bin/bash
+### BEGIN INIT INFO
+# Provides:          Starts and stops a collection of VMware machines
+# Required-Start:
+# Required-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: VMs
+# Description:       Vms
+### END INIT INFO
+# Author: Name <ger.flossmann@gmail.com>
+
+VM[0]='/home/gerald/VMs/VM1/webserver.vmx'
+VM[1]='/home/gerald/VMs/VM2/windows.vmx'
+VM[2]='/home/gerald/VMs/VM3/debian.vmx'
+
+# Aktionen
+case "$1" in
+    start)
+        for i in ${VM[@]}
+        do
+            echo starting $i
+            su - gerald -c "vmrun start $i nogui"
+        done
+        ;;
+    stop)
+        for i in ${VM[@]}
+        do
+            echo suspending $i
+            su - gerald -c "vmrun suspend $i nogui"
+        done
+        timeout=360
+        until $(vmrun list | grep -q 'VMs: 0')
+        do
+          echo  "$timeout seconds"
+          ((timeout-=5))
+          sleep 5
+          if [[ $timeout -eq "0" ]]
+            then
+            break
+          fi
+        done
+        ;;
+    restart)
+        echo "Stopping all virtual machines"
+        $0 stop
+        sleep 1
+        echo "Starting all virtual machines"
+        $0 start
+        ;;
+    status)
+        vmrun list
+        ;;
+esac
+
+exit 0
