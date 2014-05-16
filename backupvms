@@ -1,0 +1,50 @@
+#! /bin/bash
+#########################################################################
+#                                                                       #
+# This script allows periodically weekly and monthly backups		#
+# of vmware machines. It creates a snapshot and does a compressed 	#
+# backup into the backupfolder						#
+#									#
+# Put this into /etc/cron.weekly                                        #
+#									#
+# Gerald Flossmann - 16.05.2014                                         #
+#                                                                       #
+#########################################################################
+
+backupfolder='/storage/backups/VMs'
+log='/var/log/backupvms.log'
+
+VMs[0]='/home/gerald/VMs/vm1/freebsd.vmx'
+VMs[1]='/home/gerald/VMs/vm2/windows.vmx'
+VMs[2]='/home/gerald/VMs/vm3/debian.vmx'
+
+datestr=$(date +"%F_%T")
+monthstr=$(date +"%Y_%m")
+weekstr=week$(date +%V)
+
+for i in ${VMs[@]}
+    do
+        vm=$(basename "$i")
+        vmdir=${i%/*}
+
+        echo Create new monthly snapshot for $vm >> $log
+        su - gerald -c "vmrun -T ws snapshot $i $datestr"
+
+        echo Create new weekly snapshot for $vm >> $log
+        su - gerald -c "vmrun -T ws snapshot $i $weekstr"
+
+        monthlyBackup=/storage/backups/VMs/$vm.$monthstr.tar.bz2
+        if [ ! -f $monthlyBackup ];
+        then
+            echo Create full backup of $vmdir to $monthlyBackup >> $log
+            su - gerald -c "tar -jcf $monthlyBackup $vmdir"
+        fi
+
+        weeklyBackup=/storage/backups/VMs/$vm.$weekstr.tar.bz2
+        if [ ! -f $weeklyBackup ];
+        then
+            echo Create full backup of $vmdir to $weeklyBackup >> $log
+            su - gerald -c "tar -jcf $weeklyBackup $vmdir"
+        fi
+done
+exit 1
