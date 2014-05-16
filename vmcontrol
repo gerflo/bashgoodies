@@ -8,7 +8,7 @@
 # Short-Description: VMs
 # Description:       Vms
 ### END INIT INFO
-# Author: Name <ger.flossmann@gmail.com>
+# Author: Gerald Flossmann <ger.flossmann@gmail.com>
 
 VM[0]='/home/gerald/VMs/VM1/webserver.vmx'
 VM[1]='/home/gerald/VMs/VM2/windows.vmx'

@@ -7,3 +7,5 @@ checks a list of disks for free space (absolute) and/or used space (percent) and
 * __vmcontrol__  
 debian/ubuntu init script for controlling multiple VMware machines
 
+* __backupvms__  
+does weekly and monthly backups for a list of vmware machines

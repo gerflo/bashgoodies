@@ -1,10 +1,13 @@
 #!/bin/bash
-###############################
-#
-# This script allows to check, if a disk has less than x space free or more than x percent in use 
-# 
-#
-##############################
+#########################################################################
+#									#
+# This script allows to check, if a disk has less than x space free,	#
+# or more than x percent in use and send an email to the user.		#
+# 									#
+# Gerald Flossmann - 16.05.2014						#
+#									#
+#########################################################################
+
 source /etc/profile
 
 # mail adress who gets the warnings
