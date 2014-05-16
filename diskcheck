@@ -1,0 +1,48 @@
+#!/bin/bash
+###############################
+#
+# This script allows to check, if a disk has less than x space free or more than x percent in use 
+# 
+#
+##############################
+source /etc/profile
+
+# mail adress who gets the warnings
+MAILTO=john@foo.org
+
+# Space separated list of devices to check free space in - can also be paths
+# warn if free space is lower than MINSPACE (gigabyte)
+DEVS1="/dev/sda1 /dev/sdb1 /mnt/myFancyDisk"
+MINSPACE=20
+
+# Space separated list of devices to check used space in % - can also be paths
+# warn if used space in % is more than MAXPERCENT
+DEVS2="/dev/sda2 /dev/sdc1"
+MAXPERCENT=90
+
+for DEV in $DEVS1
+do
+  diskSpace=$(df -h $DEV | tail -1 | awk '{print $2}')
+  available=$(df -k $DEV | tail -1 | awk '{print $4}') 
+  availableSpace=$(($(($available/1024))/1024))
+
+
+  if [ $availableSpace -le $MINSPACE ]
+  then
+    echo "$DEV is low on space on $HOSTNAME"
+    echo "$DEV ($diskSpace) has "$availableSpace"Gb free on $HOSTNAME"
+    df -h $DEV | mail -s "$DEV is low on space on $HOSTNAME" $MAILTO
+  fi
+done
+
+
+for DEV in $DEVS2
+do
+  PERCENT=`df -k $DEV | grep -v ^File | awk '{printf ("%i",$3*100 / $2); }'`
+  if [ $PERCENT -ge $MAXPERCENT ]
+  then
+    echo "$DEV is low on space on $HOSTNAME"
+    echo "$(df -h $DEV)"
+    df -h $DEV | mail -s "$DEV is low on space on $HOSTNAME" $MAILTO
+  fi
+done
