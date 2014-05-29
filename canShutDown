@@ -1,0 +1,44 @@
+#!/bin/bash
+logfile=/var/log/mythtv/shutdown.log
+logtime=`date +%Y-%m-%d--%H:%M:%S`
+
+echo $logtime canShutDown - checking for open connections >> "$logfile"
+users_ssh=`netstat -an | grep ESTABLISHED | grep ':22 ' | wc -l`
+users_samba=`netstat -an | grep ESTABLISHED | grep ':445 ' | wc -l`
+users_netatalk=`netstat -an | grep ESTABLISHED | grep ':548 ' | wc -l`
+
+canShutDown="1"
+
+if [ "$users_ssh" -gt 0 ]; then
+    canShutDown="0"
+    echo "$users_ssh active ssh connections" >> $logfile
+fi
+
+if [ "$users_samba" -gt 0 ]; then
+    canShutDown="0"
+    echo "$users_samba active samba connections" >> "$logfile"
+fi
+
+if [ "$users_netatalk" -gt 0 ]; then
+    canShutDown="0"
+    echo "$users_netatalk active netatalk connections" >> "$logfile"
+fi
+
+mythshutdownPossible=`mythshutdown -c`
+echo "mythshutdown result: $mythshutdownPossible" >> "$logfile"
+
+if [ "$mythshutdownPossible" != "OK to shutdown" ]; then
+    canShutDown="0"
+    echo "mythshutdown reports $mythshutdownPossible" >> "$logfile" 
+fi
+
+logtime=`date +%Y-%m-%d--%H:%M:%S`
+
+if [ "$canShutDown" -eq "1" ]; then
+    echo $logtime can ShutDown now >> "$logfile"
+#    /sbin/shutdown -h now
+    exit 0
+fi
+
+echo $logtime shutDown is currently not possible >> "$logfile"
+exit 1
